@@ -43,21 +43,22 @@ Adafruit_BNO055 imuOne = Adafruit_BNO055(1, BNO055_ADDRESS_A, &Wire1);
 Adafruit_BNO055 baseImu = Adafruit_BNO055(2, BNO055_ADDRESS_A, &Wire);
 Adafruit_BNO055 imuTwo = Adafruit_BNO055(3, BNO055_ADDRESS_A, &Wire2);
 
-LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D5, LCD_D6);
+LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 
 //Motor loop constants
-#define KP  1                                                              
+#define KP  2                                                              
 #define KI  0.001
 #define KD  0
 
 PololuDcMotor motor1 = PololuDcMotor(DIR1, SLP1, M1_PWM);
 Encoder enc1(ENCA_1, ENCB_1);
 PID motor1Gains(KP, KI, KD);
+LeadCompensator motor1Lead(KP, 5, 0.01, 0.1);
 
 PololuDcMotor motor2 = PololuDcMotor(DIR2, SLP2, M2_PWM);
 Encoder enc2(ENCA_2, ENCB_2);
-PID motor2Gains(KP, KI, KD);
+PID motor2Gains(0.75, KI, KD);
 
 #define SPOOL_PLATE_RATIO 41.57
 #define ANGLE_LIMIT 16
@@ -285,7 +286,7 @@ void motorLoop() {
   }
   
   long pos1 = enc1.read();
-  double power1 = motor1Gains.update(pos1);
+  double power1 = motor1Lead.update(pos1);
   
   if (pos1 > SPOOL_PLATE_RATIO*ANGLE_LIMIT && power1 < 0) {
     motor1.setBrake(true);
@@ -322,6 +323,7 @@ void positionLoop() {
     float cmd1 = euler2.y();
     float cmd2 = euler2.z();
     motor1Gains.target = (long)(SPOOL_PLATE_RATIO*cmd1);
+    motor1Lead.target = (long)(SPOOL_PLATE_RATIO*cmd1);
     motor2Gains.target = (long)(SPOOL_PLATE_RATIO*cmd2); 
     
     csv_buffer[CSV_Z1] = euler1.z();
