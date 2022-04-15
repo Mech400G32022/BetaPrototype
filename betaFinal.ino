@@ -24,7 +24,7 @@
 
 #define DIR2 38
 #define SLP2 39
-#define CS_1 40
+#define CS2 40
 #define M2_PWM 37
 #define ENCA_2 31
 #define ENCB_2 32
@@ -47,7 +47,7 @@ LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 
 //Motor loop constants
-#define KP  2                                                              
+#define KP  0.75                                                              
 #define KI  0.001
 #define KD  0
 
